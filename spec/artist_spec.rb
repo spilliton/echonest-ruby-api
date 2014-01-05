@@ -3,16 +3,16 @@ require 'spec_helper'
 describe Echonest::Artist do
 
   def create_valid_artist
-    @a = Echonest::Artist.new('BNOAEBT3IZYZI6WXI', 'Weezer')
+    @a = Echonest::Artist.new('Weezer')
   end
 
   def create_valid_artist_with_id
-    @a = Echonest::Artist.new('BNOAEBT3IZYZI6WXI', nil, nil, 'ARH6W4X1187B99274F')
+    @a = Echonest::Artist.new(nil, nil, 'ARH6W4X1187B99274F')
   end
 
 
   it 'should allow an Artist to have a name' do
-    a = Echonest::Artist.new('12345', 'Weezer')
+    a = Echonest::Artist.new('Weezer')
     a.name.should eql 'Weezer'
   end
 
@@ -20,7 +20,7 @@ describe Echonest::Artist do
 
     it 'should always return artist' do
       VCR.use_cassette('entity_name') do
-        a = Echonest::Artist.new('Weezer', '12345')
+        a = Echonest::Artist.new('12345')
         a.entity_name.should eql 'artist'
       end
     end
@@ -44,8 +44,12 @@ describe Echonest::Artist do
     end
 
     it 'should deal gracefully with an invalid API key' do
+      Echonest.setup do |config|
+        config.api_key = 'Weezer'
+      end
+
       VCR.use_cassette('invalid_api_key_error') do
-        a = Echonest::Artist.new('Weezer', 'THISISNOTAKEY')
+        a = Echonest::Artist.new('THISISNOTAKEY')
         expect { a.biographies }.to raise_error(Echonest::Error)
       end
     end
@@ -106,7 +110,7 @@ describe Echonest::Artist do
 
     it 'should allow Artists with whitespace in their names' do
       VCR.use_cassette('images_whitespace') do
-        @a = Echonest::Artist.new('BNOAEBT3IZYZI6WXI', 'Bob Marley')
+        @a = Echonest::Artist.new('Bob Marley')
         @a.images.should be_a Array
       end
     end
@@ -202,7 +206,7 @@ describe Echonest::Artist do
 
     it 'should return an artist profile given an id' do
       VCR.use_cassette('profile') do
-        @a = Echonest::Artist.new('BNOAEBT3IZYZI6WXI', nil, nil, 'ARH6W4X1187B99274F')
+        @a = Echonest::Artist.new(nil, nil, 'ARH6W4X1187B99274F')
         artist = @a.profile
         artist.should be_a Echonest::Artist
         artist.name.should eq "Radiohead"
